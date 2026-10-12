@@ -1,0 +1,72 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@using ConferencesRF.Models
+@using ConferencesRF.Services
+@using Microsoft.EntityFrameworkCore
+@inject ConferencesRfdbContext db
+@inject NavigationManager navigationManager
+@inject UserSession userSession
+
+<div class="container">
+    <h1>Авторизация</h1>
+
+    <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
+        <DataAnnotationsValidator />
+
+        <p class="validation-message">@errorMessage</p>
+
+        <div>
+            <label>Логин</label>
+            <InputText @bind-Value="loginModel.Login" placeholder="ivan_03"></InputText>
+            <ValidationMessage For="@(() => loginModel.Login)" />
+        </div>
+        <div>
+            <label>Пароль</label>
+            <InputText type="password" @bind-Value="loginModel.Password" placeholder="*****"></InputText>
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Войти</button>
+
+        <br />
+        <p>Еще не зарегистрированы? <a href="/">Регистрация</a></p>
+    </EditForm>
+</div>
+
+@code {
+    LoginModel loginModel = new LoginModel();
+    string errorMessage = "";
+
+    async void HandleLogin()
+    {
+        User? user = db.Users.Include(u => u.Role).FirstOrDefault(u => u.Login == loginModel.Login && u.Password == loginModel.Password);
+
+        if (user != null)
+        {
+            userSession.SetUser(user.Id, user.Name, user.Role.Name);
+
+            // Пользователь найден
+            if (user.RoleId == 1)
+            {
+                navigationManager.NavigateTo("/bookings");
+            }
+            else
+            {
+                navigationManager.NavigateTo("/admin");
+            }
+        }
+        else
+        {
+            // Пользователь не найден
+            errorMessage = "Введён неправильный логин или пароль. Попробуйте снова";
+        }
+    }
+
+    class LoginModel
+    {
+        [Required(ErrorMessage = "Поле \"Логин\" обязательно для заполнения")]
+        public string Login { get; set; }
+        [Required(ErrorMessage = "Поле \"Пароль\" обязательно для заполнения")]
+        public string Password { get; set; }
+    }
+}

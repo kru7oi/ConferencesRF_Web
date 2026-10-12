@@ -1,0 +1,222 @@
+@font-face {
+    font-family: 'PT Sans';
+    src: url('fonts/PTSans-Regular.ttf');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PT Sans';
+    src: url('fonts/PTSans-Bold.ttf');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PT Sans';
+    src: url('fonts/PTSans-Italic.ttf');
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* Цветовая палитра */
+:root {
+    --color-blue: #007bff;
+    --color-dark-blue: #0d47a1;
+    --color-gray: #6c757d;
+    --color-bg: #f8f9fa;
+    --color-hightlight: #ffffff;
+    --color-danger: #d82525;
+}
+
+/* Основные стили */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 16px;
+    background-color: var(--color-bg);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+header {
+    display: flex;
+    height: 100px;
+    background: var(--color-hightlight);
+    border-bottom: 2px solid var(--color-dark-blue);
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+}
+
+.footer {
+    display: flex;
+    background: var(--color-dark-blue);
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    color: var(--color-hightlight);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    background-color: var(--color-hightlight);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    width: 100%;
+}
+
+thead {
+    background-color: var(--color-dark-blue);
+    color: var(--color-hightlight);
+}
+
+th, td {
+    padding: 10px;
+}
+
+h1 {
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 36px;
+}
+
+h2 {
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 24px;
+}
+
+h3 {
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 18px;
+}
+
+p, label, input, select, textarea, button {
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 16px;
+}
+
+small {
+    font-family: 'PT Sans', Arial, sans-serif;
+    font-size: 12px;
+    font-style: italic;
+}
+
+a {
+    color: var(--color-blue);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    a:hover {
+        color: var(--color-dark-blue);
+        text-decoration: underline;
+    }
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 32px;
+    background-color: var(--color-hightlight);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.validation-message {
+    font-size: 12px;
+    color: var(--color-danger);
+    margin-bottom: 10px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    color: #212529;
+    background-color: var(--color-hightlight);
+    border: 1px solid var(--color-gray);
+    border-radius: 4px;
+}
+
+.btn {
+    display: flex;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    color: var(--color-hightlight);
+    background-color: var(--color-blue);
+    border-color: var(--color-blue);
+}
+
+    .btn-primary:hover {
+        color: var(--color-hightlight);
+        background-color: var(--color-dark-blue);
+        border-color: var(--color-dark-blue);
+    }
+
+.booking-card {
+    background: var(--color-hightlight);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--color-blue);
+}
+
+.feedback-user {
+    font-weight: 700;
+    padding: 5px;
+}
+
+.feedback-content {
+    padding: 5px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Адаптивный дизайн */
+@media(max-width: 844px) {
+    .container {
+        max-width: 844px;
+        margin: 0;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

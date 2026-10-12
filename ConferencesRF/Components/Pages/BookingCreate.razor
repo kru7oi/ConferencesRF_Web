@@ -1,0 +1,87 @@
+﻿@page "/booking/create"
+@using Microsoft.EntityFrameworkCore
+@using ConferencesRF.Models
+@using ConferencesRF.Services
+@inject UserSession userSession
+@inject ConferencesRfdbContext db
+@inject NavigationManager navigationManager
+
+<div class="container">
+    <h1>Формирование заявки</h1>
+
+    <EditForm Model="@booking" OnValidSubmit="@HandleBooking">
+        <DataAnnotationsValidator />
+
+        <p class="validation-message">@errorMessage</p>
+
+        <div>
+            <label>Название конференции</label>
+            <InputText @bind-Value="booking.ConferenceName" placeholder="Конференция для ИТ"></InputText>
+            <ValidationMessage For="@(() => booking.ConferenceName)" />
+        </div>
+        <div>
+            <label>Дата начала конференции</label>
+            <InputDate @bind-Value="booking.Date" ></InputDate>
+            <ValidationMessage For="@(() => booking.Date)" />
+        </div>
+
+        <div>
+            <label>Помещение</label>
+            <InputSelect @bind-Value="@booking.RoomId">
+                <option value="0">-- Выберите помещение --</option>
+                @foreach (var room in rooms)
+                {
+                    <option value="@room.Id">@room.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => booking.RoomId)" />
+        </div>
+
+        <div>
+            <label>Способ оплаты</label>
+            <InputSelect @bind-Value="@booking.PaymentTypeId">
+                <option value="0">-- Выберите способ оплаты --</option>
+                @foreach (var paymentType in paymentTypes)
+                {
+                    <option value="@paymentType.Id">@paymentType.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => booking.PaymentTypeId)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Отправить</button>
+    </EditForm>
+</div>
+
+@code {
+    List<PaymentType> paymentTypes = new List<PaymentType>();
+    List<Room> rooms = new List<Room>();
+    Booking booking = new Booking();
+
+    private string errorMessage;
+
+    private void HandleBooking()
+    {
+        booking.UserId = userSession.UserId.Value;
+        booking.BookingStatusId = 1;
+
+        try
+        {
+            db.Bookings.Add(booking);
+            db.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+
+        navigationManager.NavigateTo("/bookings");
+    }
+
+    // Метод будет выполнен во время загрузки страницы
+    protected override async Task OnInitializedAsync()
+    {
+        paymentTypes = await db.PaymentTypes.ToListAsync();
+        rooms = await db.Rooms.Include(r => r.RoomType).ToListAsync();
+    }
+}

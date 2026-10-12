@@ -1,0 +1,74 @@
+﻿@page "/"
+@inject ConferencesRfdbContext db
+@inject NavigationManager navigationManager
+@using ConferencesRF.Models
+@using Microsoft.EntityFrameworkCore
+
+<div class="container">
+    <h1>Регистрация</h1>
+
+    <EditForm Model="@user" OnValidSubmit="@HandleRegister">
+        <DataAnnotationsValidator />
+
+        <p>@errorMessage</p>
+
+        <div>
+            <label>Логин</label>
+            <InputText @bind-Value="user.Login" placeholder="ivan_03"></InputText>
+            <ValidationMessage For="@(() => user.Login)" />
+        </div>
+        <div>
+            <label>Пароль</label>
+            <InputText type="password" @bind-Value="user.Password" placeholder="*****"></InputText>
+            <ValidationMessage For="@(() => user.Password)" />
+        </div>
+        <div>
+            <label>ФИО</label>
+            <InputText @bind-Value="user.Name" placeholder="Иванов Иван"></InputText>
+            <ValidationMessage For="@(() => user.Name)" />
+        </div>
+        <div>
+            <label>Телефон</label>
+            <InputText @bind-Value="user.Phone" placeholder="8(XXX)XXX-XX-XX"></InputText>
+            <ValidationMessage For="@(() => user.Phone)" />
+        </div>
+        <div>
+            <label>Почта</label>
+            <InputText @bind-Value="user.Email" placeholder="ivan@mail.ru"></InputText>
+            <ValidationMessage For="@(() => user.Email)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Создать пользователя</button>
+
+        <br />
+        <p>Есть учётная запись? <a href="/login">Авторизация</a></p>
+    </EditForm>
+</div>
+
+@code {
+    User user = new User()
+    {
+        // Назначаем идентификатор роли по умолчанию
+        RoleId = 1
+    };
+
+    string errorMessage = "";
+
+    async Task HandleRegister()
+    {
+        // Проверка уникальности логина
+        bool isLoginExists = await db.Users.AnyAsync(u => u.Login == user.Login);
+
+        if (isLoginExists == true)
+        {
+            errorMessage = "Пользователь с указанным логином уже существует. Придумайте другой логин.";
+            return;
+        }
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        // Переход на авторизацию
+        navigationManager.NavigateTo("/login");
+    }
+}

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="icon" href="/icons/favicon.png"/>
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["ConferencesRF.styles.css"]" />
+    <ImportMap />
+    <HeadOutlet @rendermode="InteractiveServer" />
+</head>
+
+<body>
+    <header>
+            <div class="header-logo">
+                <img style="width: 50px;" src="/images/logo.jpg"/>
+                <h3>Конференции.РФ</h3>
+            </div>
+    </header>
+
+    <Routes @rendermode="InteractiveServer" />
+    <ReconnectModal />
+
+    <footer>
+        <div class="footer">
+            <p>© @DateTime.Now.Year. Конференции.РФ</p>
+            <div class="socials">
+                <a href="https://vk.com">
+                    <img src="/icons/vk.png" style="width: 30px;"/>
+                </a>
+                <a href="https://ok.ru">
+                    <img src="/icons/ok.png" style="width: 30px;"/>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+﻿@page "/bookings"
+@using ConferencesRF.Models
+@using ConferencesRF.Services
+@using Microsoft.EntityFrameworkCore
+@inject ConferencesRfdbContext db
+@inject UserSession userSession
+
+<div class="container">
+    <h1>Бронирования</h1>
+
+    <a href="/booking/create">Формирование заявки</a>
+
+    @foreach (var booking in bookings)
+    {
+        <div class="booking-card">
+            <h3>@booking.ConferenceName</h3>
+            <div>
+                <span>Помещение:</span>
+                <span>@booking.Room.Name</span>
+            </div>
+            <div>
+                <img style="width: 200px;margin:5px 0px;" src="@booking.Room.ImageUrl" />
+            </div>
+            <div>
+                <span>Дата:</span>
+                <span>@booking.Date.ToString("d")</span>
+            </div>
+            <div>
+                <span>Способ оплаты:</span>
+                <span>@booking.PaymentType.Name</span>
+            </div>
+            <div>
+                <span>Статус:</span>
+                <span>@booking.BookingStatus.Name</span>
+            </div>
+        </div>
+
+        <div class="feedback-card">
+            @foreach (var feedback in booking.Feedbacks)
+            {
+                <p class="feedback-user">@feedback.Booking.User.Name</p>
+                <p class="feedback-content">@feedback.Content</p>
+            }
+        </div>
+
+        @if (booking.BookingStatusId == 3)
+        {
+            <button class="btn btn-primary" @onclick="() => ShowFeedbackForm(booking.Id)">Оставить отзыв</button>
+        }
+
+        @if (booking.Id == selectedBookingId)
+        {
+            <EditForm Model="@newFeedback" OnValidSubmit="@SubmitFeedback">
+                <DataAnnotationsValidator />
+
+                <div>
+                    <br />
+                    <label>Ваш отзыв:</label>
+                    <InputTextArea @bind-Value="newFeedback.Content" rows="4" placeholder="Поделитесь впечатлениями о мероприятии..."></InputTextArea>
+                    <ValidationMessage For="@(() => newFeedback.Content)" />
+                </div>
+
+                <button class="btn btn-primary" type="submit">Отправить отзыв</button>
+            </EditForm>
+        }
+    }
+</div>
+
+@code {
+    // Список броней/заявок
+    List<Booking> bookings = new List<Booking>();
+    // Отзыв
+    Feedback newFeedback = new Feedback();
+    // Идентификатор заявки
+    int? selectedBookingId = null;
+
+    // Метод будет выполнен во время загрузки страницы
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooking();
+    }
+
+    private async Task LoadBooking()
+    {
+        bookings = await db.Bookings
+        .Include(b => b.Room)
+        .Include(b => b.PaymentType)
+        .Include(b => b.BookingStatus)
+        .Include(b => b.Feedbacks)
+        .OrderByDescending(b => b.Date)
+        .Where(b => b.UserId == userSession.UserId)
+        .ToListAsync();
+    }
+
+    private async Task SubmitFeedback()
+    {
+        if (selectedBookingId == null)
+        {
+            return;
+        }
+
+        newFeedback.BookingId = selectedBookingId.Value;
+        db.Feedbacks.Add(newFeedback);
+        db.SaveChanges();
+        selectedBookingId = null;
+        newFeedback = new Feedback();
+        await LoadBooking();
+    }
+
+    private void ShowFeedbackForm(int bookingId)
+    {
+        selectedBookingId = bookingId;
+        newFeedback = new Feedback();
+    }
+}

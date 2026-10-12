@@ -1,0 +1,153 @@
+﻿@page "/admin"
+@using ConferencesRF.Models
+@using Microsoft.EntityFrameworkCore
+@inject ConferencesRfdbContext db
+
+<div class="container">
+    <h1>Панель администратора</h1>
+
+    <div class="filter-group">
+        <label>Помещение:</label>
+        <InputSelect @bind-Value="@roomId">
+            <option value="0">-- Выберите помещение --</option>
+            @foreach (var room in rooms)
+            {
+                <option value="@room.Id">@room.Name</option>
+            }
+        </InputSelect>
+
+        <label>Способ оплаты:</label>
+        <InputSelect @bind-Value="@paymentTypeId">
+            <option value="0">-- Выберите способ оплаты --</option>
+            @foreach (var paymentType in paymentTypes)
+            {
+                <option value="@paymentType.Id">@paymentType.Name</option>
+            }
+        </InputSelect>
+
+        <div class="filter-buttons">
+            <button class="btn btn-primary" @onclick="ApplyFilters">Применить</button>
+            <button class="btn btn-primary" @onclick="ResetFilters">Сбросить</button>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Фотография</th>
+                    <th>Название конференции</th>
+                    <th>Помещение</th>
+                    <th>Дата</th>
+                    <th>Способ оплаты</th>
+                    <th>Статус</th>
+                    <th>Пользователь</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in filteredBookings)
+                {
+                    <tr>
+                        <td>
+                            <img src="@booking.Room.ImageUrl" style="width: 200px"/>
+                        </td>
+                        <td>@booking.ConferenceName</td>
+                        <td>@booking.Room.Name</td>
+                        <td>@booking.Date.ToString("d")</td>
+                        <td>@booking.PaymentType.Name</td>
+                        <td style="display: flex;align-items: flex-start; flex-direction:column; gap: 10px;">
+                            <div>
+                                @booking.BookingStatus.Name
+                            </div>
+                            <button class="btn btn-primary" @onclick="() => AssignStatus(booking.Id)">Назначить</button>
+                            <button class="btn btn-primary" @onclick="() => CompleteStatus(booking.Id)">Завершить</button>
+                        </td>
+                        <td>@booking.User.Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    List<Booking> bookings = new List<Booking>();
+    List<Booking> filteredBookings = new List<Booking>();
+
+    List<Room> rooms = new List<Room>();
+    List<PaymentType> paymentTypes = new List<PaymentType>();
+
+    private int roomId;
+    private int paymentTypeId;
+
+    // Метод будет выполнен во время загрузки страницы
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooking();
+    }
+
+    private async Task LoadBooking()
+    {
+        rooms = await db.Rooms.OrderByDescending(r => r.Name).ToListAsync();
+        paymentTypes = await db.PaymentTypes.OrderByDescending(pt => pt.Name).ToListAsync();
+
+        bookings = await db.Bookings
+        .Include(b => b.Room)
+        .Include(b => b.PaymentType)
+        .Include(b => b.BookingStatus)
+        .Include(b => b.User)
+        .OrderByDescending(b => b.Date)
+        .ToListAsync();
+
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        var query = bookings;
+
+        // Фильтр по помещениям
+        if (roomId > 0)
+        {
+            query = query.Where(b => b.RoomId == roomId).ToList();
+        }
+
+        // Фильтр по способам оплаты
+        if (paymentTypeId > 0)
+        {
+            query = query.Where(b => b.PaymentTypeId == paymentTypeId).ToList();
+        }
+
+        filteredBookings = query;
+    }
+
+    private void ResetFilters()
+    {
+        roomId = 0;
+        paymentTypeId = 0;
+
+        ApplyFilters();
+    }
+
+    private async Task AssignStatus(int id)
+    {
+        Booking booking = await db.Bookings.FindAsync(id);
+        if (booking != null)
+        {
+            booking.BookingStatusId = 2;
+            await db.SaveChangesAsync();
+            await LoadBooking();
+        }
+    }
+
+    private async Task CompleteStatus(int id)
+    {
+        Booking booking = await db.Bookings.FindAsync(id);
+        if (booking != null)
+        {
+            booking.BookingStatusId = 3;
+            await db.SaveChangesAsync();
+            await LoadBooking();
+        }
+    }
+}
